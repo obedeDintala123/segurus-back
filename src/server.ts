@@ -2,12 +2,13 @@ import fastify from "fastify";
 import dotenv from "dotenv";
 import { productRoutes } from "./routes/product.routes";
 import fastifyCors from "@fastify/cors";
+import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
 
 dotenv.config();
 
 const server = fastify({
   logger: true
-});
+}).withTypeProvider<TypeBoxTypeProvider>();
 
 server.register(fastifyCors, {
   origin: true
