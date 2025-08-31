@@ -1,8 +1,10 @@
 import fastify from "fastify";
 import dotenv from "dotenv";
-import { productRoutes } from "./routes/product.routes";
 import fastifyCors from "@fastify/cors";
 import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
+import { acidenteRoutes } from "./routes/acidente.route";
+import { userRoutes } from "./routes/usuario.route";
+import { matriculaRoutes } from "./routes/matricula.route";
 
 dotenv.config();
 
@@ -14,7 +16,9 @@ server.register(fastifyCors, {
   origin: true
 });
 
-server.register(productRoutes);
+server.register(acidenteRoutes);
+server.register(userRoutes);
+server.register(matriculaRoutes);
 
 server.get("/", async () => {
   return { status: "API rodando com Fastify + TypeScript!" };

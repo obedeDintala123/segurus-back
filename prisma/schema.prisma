@@ -1,114 +1,95 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Exemplo de model Prisma (User)
+// Após definir, rode: npx prisma migrate dev --name init
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+datasource db {
+  provider  = "postgresql"
+  url  	    = env("DATABASE_URL")
+}
 
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-model User {
-  id              Int              @id @default(autoincrement())
-  name            String
-  email           String           @unique
-  password        String
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-
-  cart            Cart?
-  orders          Order[]
-  receivedOrders  OrderReceived[]
-  userProducts    UserProduct[]
-}
-
-model Product {
-  id          Int         @id @default(autoincrement())
-  name        String
-  slug        String?     @unique
-  description String?
-  imageUrl    String
-  category    String
-  price       Decimal
-  quantity    Int         @default(0)
-  inStock     Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-
-  cartItems   CartItem[]
-  orderItems  OrderItem[]
-}
-
-model UserProduct {
-  id          Int         @id @default(autoincrement())
-  name        String
-  description String?
-  imageUrl    String
-  price       Decimal
-  createdAt   DateTime    @default(now())
-
-  userId      Int
-  user        User        @relation(fields: [userId], references: [id])
-}
-
-model Cart {
+model Matricula {
   id        Int        @id @default(autoincrement())
-  userId    Int        @unique
-  user      User       @relation(fields: [userId], references: [id])
-  createdAt DateTime   @default(now())
-
-  items     CartItem[]
+  valor     String     @unique
+  usuario   Usuario? // Relacionamento reverso, não precisa de fields/references aqui
+  acidentes  Acidente[]
+  deletedAt   DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model CartItem {
+model Usuario {
+  id          Int        @id @default(autoincrement())
+  nome        String
+  telefone    String
+  estado      Boolean    @default(true)
+  email       String     @unique
+  password    String
+  matriculaId Int?       @unique // FK para Matricula, precisa ser único para 1:1
+  matricula   Matricula? @relation(fields: [matriculaId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+}
+
+model Acidente {
+  id              Int       @id @default(autoincrement())
+  matriculaId     Int
+  matricula       Matricula @relation(fields: [matriculaId], references: [id])
+  hora            String
+  data            DateTime
+  descricao       String?
+  ativados        String
+  status_acidente String
+  velocidade     Int
+  latitude       Float
+  longitude      Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+}
+
+model Agencia {
   id         Int       @id @default(autoincrement())
-  cartId     Int
-  cart       Cart      @relation(fields: [cartId], references: [id])
-
-  productId  Int
-  product    Product   @relation(fields: [productId], references: [id])
-
-  quantity   Int       @default(1)
-  price      Decimal   // snapshot do preço no momento da adição
+  id_usuario Int
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
 }
 
-model Order {
-  id         Int        @id @default(autoincrement())
-  userId     Int
-  user       User       @relation(fields: [userId], references: [id])
-  total      Decimal
-  status     String     @default("pending") // pending | paid | shipped | cancelled
-  createdAt  DateTime   @default(now())
-
-  items      OrderItem[]
-  received   OrderReceived?
+model Parceiro {
+  id        Int       @id @default(autoincrement())
+  nome      String
+  telefone  String
+  servico   String
+  lat       Float
+  lon       Float
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
-model OrderItem {
+model SegurosAppUsuario {
+  id        Int       @id @default(autoincrement())
+  nome      String
+  telefone  String
+  matricula String
+  estado    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model Mensagem {
   id         Int       @id @default(autoincrement())
-  orderId    Int
-  order      Order     @relation(fields: [orderId], references: [id])
-
-  productId  Int
-  product    Product   @relation(fields: [productId], references: [id])
-
-  quantity   Int
-  price      Decimal   // snapshot do preço do produto no momento da compra
-}
-
-model OrderReceived {
-  id         Int       @id @default(autoincrement())
-  adminId    Int
-  admin      User      @relation(fields: [adminId], references: [id])
-
-  orderId    Int       @unique
-  order      Order     @relation(fields: [orderId], references: [id])
-
-  receivedAt DateTime  @default(now())
-  note       String?
+  texto      String
+  titulo     String
+  lida       Boolean   @default(false)
+  id_usuario Int
+  resposta   String    @default("pendente")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
 }
